@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Database data
+pg_data/
+redis_data/
+*.sqlite
