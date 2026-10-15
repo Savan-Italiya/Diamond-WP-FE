@@ -1,43 +1,121 @@
 import React from 'react';
-import { Gem, ShieldCheck, Activity, User, Bell } from 'lucide-react';
+import { Gem, ShieldCheck, Activity, User, Bell, LogOut } from 'lucide-react';
+import { User as UserType } from '../types';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  currentUser?: UserType | null;
+  onLogout?: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ currentUser, onLogout }) => {
   return (
-    <header className="glass-panel" style={{ borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '14px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <header
+      style={{
+        background: '#ffffff',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: '12px 32px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        boxShadow: 'var(--shadow-sm)'
+      }}
+    >
+      {/* Brand & Market Location */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #0284c7, #38bdf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(56, 189, 248, 0.4)' }}>
-          <Gem size={24} color="#ffffff" />
+        <div
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)'
+          }}
+        >
+          <Gem size={22} color="#ffffff" />
         </div>
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            BKC Diamond Bourse <span style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>OPERA HOUSE ERP</span>
-          </h1>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>High-Volume Financial & Stock Settlement Engine</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              BKC Diamond Bourse
+            </h1>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                color: '#b45309',
+                background: '#fef3c7',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: '1px solid #fde68a',
+                letterSpacing: '0.04em'
+              }}
+            >
+              OPERA HOUSE ERP
+            </span>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '2px 0 0 0' }}>
+            Bharat Diamond Bourse (G-Block) • Surat Karkhana Hub • Financial Ledger
+          </p>
         </div>
       </div>
 
+      {/* Cluster Health & Live Trader Info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         {/* Service health indicators */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(15, 23, 42, 0.6)', padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', color: '#34d399' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></span> PG-16
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: '#f8fafc',
+            padding: '6px 14px',
+            borderRadius: '9999px',
+            border: '1px solid var(--border-subtle)'
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', fontWeight: 600, color: '#059669' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981' }}></span> PG-16 Live
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', color: '#38bdf8' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px #38bdf8' }}></span> Redis
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', fontWeight: 600, color: '#0284c7' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#38bdf8' }}></span> Redis Safe
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', color: '#fbbf24' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b' }}></span> Kafka
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', fontWeight: 600, color: '#d97706' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f59e0b' }}></span> Kafka Bus
           </span>
         </div>
 
         {/* User profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 600, fontSize: '0.9rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '8px', borderLeft: '1px solid var(--border-subtle)' }}>
+          <div
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+              border: '1px solid #fcd34d',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#92400e',
+              fontWeight: 700,
+              fontSize: '0.85rem'
+            }}
+          >
             PS
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>Pravinbhai Shah</div>
-            <div style={{ fontSize: '0.7rem', color: '#f59e0b' }}>Managing Trader</div>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+              {currentUser?.name || 'Pravinbhai Shah'}
+            </div>
+            <div style={{ fontSize: '0.725rem', color: '#64748b', fontWeight: 500 }}>
+              Super Admin • BKC Desk
+            </div>
           </div>
         </div>
       </div>

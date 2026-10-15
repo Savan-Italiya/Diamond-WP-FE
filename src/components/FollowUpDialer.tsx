@@ -1,40 +1,92 @@
 import React, { useState } from 'react';
 import { FollowUpItem } from '../types';
-import { Phone, MessageSquare, Mic, Calendar, CheckCircle2, UserCheck } from 'lucide-react';
+import { Phone, MessageSquare, Mic, Calendar, CheckCircle2, UserCheck, AlertCircle, Play, Square } from 'lucide-react';
+import { DiamondApi } from '../services/api';
 
 interface FollowUpDialerProps {
   queue: FollowUpItem[];
+  onRefresh?: () => void;
 }
 
-export const FollowUpDialer: React.FC<FollowUpDialerProps> = ({ queue }) => {
+export const FollowUpDialer: React.FC<FollowUpDialerProps> = ({ queue: initialQueue, onRefresh }) => {
+  const [queue, setQueue] = useState<FollowUpItem[]>(initialQueue);
   const [selectedItem, setSelectedItem] = useState<FollowUpItem | null>(null);
   const [clientResponse, setClientResponse] = useState('');
   const [promiseDate, setPromiseDate] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
   const [loggedStatus, setLoggedStatus] = useState<string | null>(null);
 
-  const handleLogFollowUp = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    setQueue(initialQueue);
+  }, [initialQueue]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      setIsRecording(false);
+      setRecordedAudio('voice_note_followup_' + Date.now() + '.mp3 (0:14s)');
+    } else {
+      setIsRecording(true);
+      setRecordedAudio(null);
+    }
+  };
+
+  const handleLogFollowUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem) return;
+
+    await DiamondApi.logFollowUp({
+      party_id: selectedItem.party_id,
+      client_response: clientResponse,
+      next_follow_up_date: promiseDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+      audio_note_url: recordedAudio ? 'https://storage.diamond-bkc.in/notes/' + recordedAudio : undefined
+    });
+
+    if (promiseDate) {
+      await DiamondApi.updatePromiseDate({
+        schedule_id: selectedItem.schedule_id,
+        promised_date: promiseDate
+      });
+    }
 
     setLoggedStatus(`Follow-up logged for ${selectedItem.business_name}: "${clientResponse}"`);
     setTimeout(() => {
       setSelectedItem(null);
       setClientResponse('');
       setPromiseDate('');
+      setRecordedAudio(null);
       setLoggedStatus(null);
-    }, 2000);
+      if (onRefresh) onRefresh();
+    }, 2200);
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: selectedItem ? '1fr 380px' : '1fr', gap: '20px' }}>
-      <div className="glass-panel" style={{ padding: '24px' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: selectedItem ? '1fr 380px' : '1fr',
+        gap: '20px',
+        alignItems: 'start'
+      }}
+    >
+      {/* Follow-up Queue Table */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '24px',
+          background: '#ffffff',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-card)'
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
-              Daily Payment Follow-up Queue (Opera House & BKC)
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              Daily Payment Follow-up Desk (Opera House & BKC)
             </h2>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
-              Automated reminders for payment due dates with WhatsApp direct trigger and 1-tap dialer
+            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
+              Automated reminders for payment due dates with 1-Tap dialing and direct WhatsApp Bourse triggers
             </p>
           </div>
           <span className="badge badge-overdue" style={{ fontSize: '0.8rem', padding: '6px 12px' }}>
@@ -58,20 +110,20 @@ export const FollowUpDialer: React.FC<FollowUpDialerProps> = ({ queue }) => {
               {queue.map((item) => (
                 <tr key={item.schedule_id}>
                   <td>
-                    <div style={{ fontWeight: 600, color: '#f8fafc' }}>{item.business_name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                      {item.owner_name} • {item.phone_primary}
+                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.business_name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      Contact: {item.owner_name} ({item.phone_primary})
                     </div>
                   </td>
                   <td>
-                    <span style={{ color: '#38bdf8', fontWeight: 500 }}>{item.invoice_number}</span>
+                    <span style={{ fontWeight: 600, color: '#0284c7' }}>{item.invoice_number}</span>
                   </td>
                   <td>
-                    <span style={{ color: '#f43f5e', fontWeight: 600 }}>{item.due_date}</span>
+                    <span style={{ color: '#e11d48', fontWeight: 600 }}>{item.due_date}</span>
                   </td>
                   <td>
-                    <span style={{ fontWeight: 700, color: '#f59e0b' }}>
-                      ₹{Number(item.amount_due).toLocaleString('en-IN')}
+                    <span style={{ fontWeight: 700, color: '#e11d48', fontSize: '0.95rem' }}>
+                      ₹{item.amount_due.toLocaleString('en-IN')}
                     </span>
                   </td>
                   <td>
@@ -79,39 +131,24 @@ export const FollowUpDialer: React.FC<FollowUpDialerProps> = ({ queue }) => {
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {/* One Tap Dialing */}
-                      <a href={item.one_tap_dial_url} className="btn-dial" title="One-Tap Phone Call">
+                      <a href={item.one_tap_dial_url} className="btn-dial" title="1-Tap Dial Phone">
                         <Phone size={14} /> Call
                       </a>
-
-                      {/* WhatsApp Deep-Link Trigger */}
                       <a
-                        href={item.whatsapp_web_url}
+                        href={item.whatsapp_app_url}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noreferrer"
                         className="btn-whatsapp"
-                        title="Send WhatsApp Follow-up Alert"
+                        title="Send WhatsApp Reminder"
                       >
                         <MessageSquare size={14} /> WhatsApp
                       </a>
-
-                      {/* Log Note / Voice Note */}
                       <button
                         onClick={() => setSelectedItem(item)}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          border: 'none',
-                          color: '#f8fafc',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '0.8rem'
-                        }}
+                        className="btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                       >
-                        <Mic size={14} color="#f59e0b" /> Note
+                        Log Note
                       </button>
                     </div>
                   </td>
@@ -122,84 +159,114 @@ export const FollowUpDialer: React.FC<FollowUpDialerProps> = ({ queue }) => {
         </div>
       </div>
 
-      {/* Slide-out Follow-up Note Form */}
+      {/* Follow-up Note & Audio Drawer */}
       {selectedItem && (
-        <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 600, textTransform: 'uppercase' }}>
-                Post-Call Follow-up Log
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginTop: '4px' }}>
-                {selectedItem.business_name}
-              </h3>
-            </div>
+        <div
+          className="glass-panel"
+          style={{
+            padding: '24px',
+            background: '#ffffff',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-card)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+              Log Follow-up Call
+            </h3>
             <button
               onClick={() => setSelectedItem(null)}
-              style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
             >
-              ×
+              ✕
             </button>
           </div>
 
-          <div style={{ padding: '12px', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '8px', fontSize: '0.85rem' }}>
-            <div>Invoice: <strong style={{ color: '#38bdf8' }}>{selectedItem.invoice_number}</strong></div>
-            <div style={{ marginTop: '4px' }}>Due: <strong style={{ color: '#f43f5e' }}>₹{Number(selectedItem.amount_due).toLocaleString('en-IN')}</strong></div>
+          <div style={{ padding: '12px', background: '#f8fafc', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{selectedItem.business_name}</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Person: {selectedItem.owner_name}</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e11d48', marginTop: '4px' }}>
+              Pending: ₹{selectedItem.amount_due.toLocaleString('en-IN')}
+            </div>
           </div>
 
-          <form onSubmit={handleLogFollowUp} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '6px' }}>
-                Client Response / Discussion Outcome:
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={clientResponse}
-                onChange={(e) => setClientResponse(e.target.value)}
-                placeholder="e.g. Spoke with Bipinbhai. Promised RTGS of Rs. 10 Lakhs this Friday..."
-                style={{
-                  width: '100%',
-                  background: '#0a0d14',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  color: '#f8fafc',
-                  fontSize: '0.85rem',
-                  resize: 'none'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '6px' }}>
-                Next Follow-up / Promised Date:
-              </label>
-              <input
-                type="date"
-                value={promiseDate}
-                onChange={(e) => setPromiseDate(e.target.value)}
-                style={{
-                  width: '100%',
-                  background: '#0a0d14',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  color: '#f8fafc',
-                  fontSize: '0.85rem'
-                }}
-              />
-            </div>
-
-            <button type="submit" className="btn-primary" style={{ justifyContent: 'center', marginTop: '6px' }}>
-              <CheckCircle2 size={16} /> Save Follow-up & Promise Date
-            </button>
-          </form>
-
-          {loggedStatus && (
-            <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center' }}>
+          {loggedStatus ? (
+            <div
+              style={{
+                padding: '14px',
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                borderRadius: 'var(--radius-sm)',
+                color: '#065f46',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                textAlign: 'center'
+              }}
+            >
+              <CheckCircle2 size={24} style={{ margin: '0 auto 8px auto', display: 'block' }} />
               {loggedStatus}
             </div>
+          ) : (
+            <form onSubmit={handleLogFollowUp} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label className="form-label">Client Call Response</label>
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="e.g. Promised RTGS of 50 Lakhs by Friday after checking Hong Kong show proceeds..."
+                  value={clientResponse}
+                  onChange={(e) => setClientResponse(e.target.value)}
+                  className="form-textarea"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Promised Payment Date</label>
+                <input
+                  type="date"
+                  value={promiseDate}
+                  onChange={(e) => setPromiseDate(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Voice Note / Audio Clip</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={toggleRecording}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid',
+                      borderColor: isRecording ? '#e11d48' : '#cbd5e1',
+                      background: isRecording ? '#fee2e2' : '#ffffff',
+                      color: isRecording ? '#e11d48' : '#334155',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {isRecording ? <Square size={14} /> : <Mic size={14} />}
+                    {isRecording ? 'Stop Recording' : 'Record Audio Note'}
+                  </button>
+                  {recordedAudio && (
+                    <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600 }}>
+                      ✓ {recordedAudio}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                <CheckCircle2 size={16} /> Save Follow-up Record
+              </button>
+            </form>
           )}
         </div>
       )}

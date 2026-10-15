@@ -14,23 +14,53 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   subtitle,
   icon: Icon,
-  accentColor = '#38bdf8'
+  accentColor = '#0284c7'
 }) => {
   return (
-    <div className="glass-panel" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '90px', height: '90px', borderRadius: '50%', background: accentColor, opacity: 0.1, filter: 'blur(20px)' }}></div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-        <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+    <div
+      className="glass-panel"
+      style={{
+        padding: '20px 22px',
+        position: 'relative',
+        overflow: 'hidden',
+        background: '#ffffff',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: 'var(--shadow-card)'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           {title}
         </span>
-        <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <Icon size={20} color={accentColor} />
+        <div
+          style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '10px',
+            background: `${accentColor}10`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: `1px solid ${accentColor}25`
+          }}
+        >
+          <Icon size={19} color={accentColor} />
         </div>
       </div>
-      <div style={{ fontSize: '1.85rem', fontWeight: 700, color: '#f8fafc', marginBottom: '6px', fontFamily: 'var(--font-heading)' }}>
+      <div
+        style={{
+          fontSize: '1.75rem',
+          fontWeight: 700,
+          color: '#0f172a',
+          marginBottom: '4px',
+          fontFamily: 'var(--font-heading)',
+          letterSpacing: '-0.02em'
+        }}
+      >
         {value}
       </div>
-      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+      <div style={{ fontSize: '0.775rem', color: '#64748b', fontWeight: 500 }}>
         {subtitle}
       </div>
     </div>
