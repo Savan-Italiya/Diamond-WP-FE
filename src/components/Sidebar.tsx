@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   LayoutDashboard,
   Diamond,
@@ -9,15 +8,19 @@ import {
   PhoneCall,
   Hammer,
   ShieldCheck,
-  TrendingUp
+  TrendingUp,
+  LogOut,
+  Building2,
+  Wallet
 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) => {
   const navSections = [
     {
       title: 'Diamond Trading Desk',
@@ -31,9 +34,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     {
       title: 'Financial & Ledger',
       items: [
-        { id: 'ledger', label: 'Multi-Party Khata Ledgers', icon: BookOpen },
-        { id: 'parties', label: 'Parties & Brokers Directory', icon: Users },
-        { id: 'followups', label: 'Payment Follow-ups & Dialer', icon: PhoneCall }
+        { id: 'ledger',   label: 'Multi-Party Khata Ledgers',   icon: BookOpen },
+        { id: 'parties',  label: 'Parties & Brokers Directory',  icon: Users },
+        { id: 'followups',label: 'Payment Follow-ups & Dialer',  icon: PhoneCall },
+        { id: 'expenses', label: 'Kharcha / Expense Tracker',    icon: Wallet },
+      ]
+    },
+    {
+      title: 'Firm & Team (Multi-User)',
+      items: [
+        { id: 'organization', label: 'Organization & Staff', icon: Building2 }
       ]
     },
     {
@@ -127,6 +137,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
           ▲ +1.4% this week (Surat/BDB)
         </div>
       </div>
+
+      {/* Prominent Sidebar Sign Out Button */}
+      {onLogout && (
+        <button
+          onClick={onLogout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            width: '100%',
+            padding: '12px 16px',
+            background: '#fff1f2',
+            border: '1.5px solid #fda4af',
+            borderRadius: '10px',
+            color: '#e11d48',
+            fontWeight: 700,
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 1px 3px rgba(225,29,72,0.08)'
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = '#ffe4e6';
+            (e.currentTarget as HTMLElement).style.borderColor = '#e11d48';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = '#fff1f2';
+            (e.currentTarget as HTMLElement).style.borderColor = '#fda4af';
+          }}
+          title="Sign Out / Logout"
+        >
+          <LogOut size={17} />
+          <span>Sign Out / Log Out</span>
+        </button>
+      )}
     </aside>
   );
 };

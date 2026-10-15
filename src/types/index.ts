@@ -163,7 +163,7 @@ export interface SalesOrder {
   discount_pct: number;
   net_amount: number;
   payment_due_date: string;
-  deal_status: 'PENDING' | 'CONFIRMED' | 'DELIVERED' | 'SETTLED' | 'CANCELLED';
+  deal_status: 'PENDING' | 'CONFIRMED' | 'DELIVERED' | 'SETTLED' | 'CANCELLED' | 'UNPAID' | 'PAID' | 'PARTIAL';
   created_at?: string;
   items?: Array<{
     id: string;
@@ -234,4 +234,37 @@ export interface WhatsAppTemplate {
   template_name: string;
   message_body: string;
   category: 'PAYMENT_REMINDER' | 'MEMO_CHALLAN' | 'NEW_ARRIVAL';
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  registration_number?: string;
+  phone?: string;
+  email?: string;
+  city?: string;
+  address?: string;
+  members_count?: number;
+  created_at?: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  status: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
+  user_scope: 'INDIVIDUAL' | 'GLOBAL';
+  roles: string[];
+  my_deals_count?: number;
+  created_at: string;
+}
+
+export interface SmsLog {
+  id: string;
+  party_id?: string;
+  phone: string;
+  message_body: string;
+  status: string;
+  created_at: string;
 }

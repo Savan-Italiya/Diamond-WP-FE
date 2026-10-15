@@ -119,21 +119,26 @@ export const DiamondTable: React.FC<DiamondTableProps> = ({ lots: initialLots, s
     e.preventDefault();
     if (!selectedLot || !breakdownForm.carats_to_transfer) return;
     const transferCts = parseFloat(breakdownForm.carats_to_transfer);
-    await DiamondApi.breakdownLot({
-      parent_lot_id: selectedLot.id,
-      child_lot_number: breakdownForm.new_lot_number || `${selectedLot.lot_number}-SUB`,
-      carats_transferred: transferCts
-    });
+    try {
+      await DiamondApi.breakdownLot({
+        parent_lot_id: selectedLot.id,
+        new_lot_number: breakdownForm.new_lot_number || `${selectedLot.lot_number}-SUB`,
+        carats_transferred: transferCts
+      });
 
-    // Update parent lot in state
-    setLots(
-      lots.map((l) =>
-        l.id === selectedLot.id ? { ...l, current_carat: Math.max(0, l.current_carat - transferCts) } : l
-      )
-    );
-    setShowBreakdownModal(false);
-    setSelectedLot(null);
-    setBreakdownForm({ carats_to_transfer: '', new_lot_number: '' });
+      // Update parent lot in state
+      setLots(
+        lots.map((l) =>
+          l.id === selectedLot.id ? { ...l, current_carat: Math.max(0, l.current_carat - transferCts) } : l
+        )
+      );
+      setShowBreakdownModal(false);
+      setSelectedLot(null);
+      setBreakdownForm({ carats_to_transfer: '', new_lot_number: '' });
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err?.message || 'Failed to breakdown lot');
+    }
   };
 
   // Columns for Bulk Lots

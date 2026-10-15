@@ -379,3 +379,42 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Payment due-today pulse on Mark PAID button */
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35); }
+  50% { box-shadow: 0 2px 20px rgba(5, 150, 105, 0.7), 0 0 0 4px rgba(5, 150, 105, 0.15); }
+}
+
+/* Notification alert ring animation */
+@keyframes ring {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-12deg); }
+  20% { transform: rotate(12deg); }
+  30% { transform: rotate(-10deg); }
+  40% { transform: rotate(10deg); }
+  50% { transform: rotate(0deg); }
+}
+
+.animate-ring {
+  animation: ring 1.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* Slide-down for modals, drawers, history panels */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide in from right for the drawer panel */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Simple fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

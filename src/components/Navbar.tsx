@@ -1,13 +1,24 @@
 import React from 'react';
-import { Gem, ShieldCheck, Activity, User, Bell, LogOut } from 'lucide-react';
+import { Gem, LogOut, Bell } from 'lucide-react';
 import { User as UserType } from '../types';
 
 interface NavbarProps {
   currentUser?: UserType | null;
   onLogout?: () => void;
+  pendingFollowUpsCount?: number;
+  onNotificationClick?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentUser, onLogout }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  currentUser,
+  onLogout,
+  pendingFollowUpsCount = 0,
+  onNotificationClick
+}) => {
+  const initials = currentUser?.name
+    ? currentUser.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'PS';
+
   return (
     <header
       style={{
@@ -65,8 +76,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onLogout }) => {
         </div>
       </div>
 
-      {/* Cluster Health & Live Trader Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      {/* Right side: service health + user + logout */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {/* Service health indicators */}
         <div
           style={{
@@ -90,8 +101,51 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onLogout }) => {
           </span>
         </div>
 
+        {/* Notifications Bell */}
+        <button
+          onClick={onNotificationClick}
+          style={{
+            background: 'none',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '8px',
+            padding: '8px',
+            cursor: onNotificationClick ? 'pointer' : 'default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: pendingFollowUpsCount > 0 ? '#e11d48' : '#64748b',
+            position: 'relative'
+          }}
+          title={pendingFollowUpsCount > 0 ? `${pendingFollowUpsCount} Follow-ups / Payment Reminders Pending` : 'No Pending Reminders'}
+        >
+          <Bell size={17} />
+          {pendingFollowUpsCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                minWidth: '16px',
+                height: '16px',
+                padding: '0 3px',
+                borderRadius: '8px',
+                background: '#e11d48',
+                fontSize: '0.625rem',
+                fontWeight: 700,
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #fff'
+              }}
+            >
+              {pendingFollowUpsCount}
+            </span>
+          )}
+        </button>
+
         {/* User profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '8px', borderLeft: '1px solid var(--border-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '8px', borderLeft: '1px solid var(--border-subtle)' }}>
           <div
             style={{
               width: '38px',
@@ -107,17 +161,43 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onLogout }) => {
               fontSize: '0.85rem'
             }}
           >
-            PS
+            {initials}
           </div>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
               {currentUser?.name || 'Pravinbhai Shah'}
             </div>
             <div style={{ fontSize: '0.725rem', color: '#64748b', fontWeight: 500 }}>
-              Super Admin • BKC Desk
+              {currentUser?.roles?.[0] || 'SUPER_ADMIN'} • BKC Desk
             </div>
           </div>
         </div>
+
+        {/* Logout Button */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '8px',
+              color: '#e11d48',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title="Sign Out"
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#fee2e2'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#fff1f2'; }}
+          >
+            <LogOut size={15} /> Sign Out
+          </button>
+        )}
       </div>
     </header>
   );
